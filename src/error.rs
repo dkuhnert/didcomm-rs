@@ -48,5 +48,5 @@ pub enum Error {
     #[error("invalid attachment{0}")]
     AttachmentError(String),
     #[error(transparent)]
-    Other(Box<dyn std::error::Error>),
+    Other(Box<dyn std::error::Error + Send + Sync>),
 }
