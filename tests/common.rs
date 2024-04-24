@@ -1,9 +1,5 @@
 extern crate didcomm_rs;
 
-pub use std::str::FromStr;
-
-pub use didcomm_rs::{Error, Message, Shape};
-
 #[allow(dead_code)]
 pub mod sample_dids {
     pub const TEST_DID_SIGN_1: &str = r#"{

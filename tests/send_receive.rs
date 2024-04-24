@@ -131,7 +131,6 @@ mod tests {
         // Arrange
         // keys
 
-        use k256::ecdsa::signature::Keypair;
         let KeyPairSet {
             alice_public: _,
             alice_private,

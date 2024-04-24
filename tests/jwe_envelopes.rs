@@ -7,7 +7,6 @@ mod tests {
         crypto::{CryptoAlgorithm, SignatureAlgorithm},
         Error, Message,
     };
-    use k256::ecdsa::signature::Keypair;
     use rand_core::OsRng;
     use serde_json::Value;
     use utilities::{get_keypair_set, KeyPairSet};

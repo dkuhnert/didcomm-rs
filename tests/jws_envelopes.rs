@@ -9,7 +9,6 @@ mod tests {
     use didcomm_rs::crypto::{SignatureAlgorithm, Signer};
     use didcomm_rs::{Error, Message};
 
-    use k256::ecdsa::signature::Keypair;
     use rand_core::OsRng;
     use serde_json::Value;
 

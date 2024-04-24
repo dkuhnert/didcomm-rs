@@ -71,8 +71,6 @@ mod tests {
     #[test]
     #[cfg(feature = "raw-crypto")]
     fn sets_message_type_correctly_for_signed_and_encrypted_messages() -> Result<(), Error> {
-        use k256::ecdsa::signature::Keypair;
-
         let KeyPairSet {
             alice_private,
             bobs_public,
@@ -158,8 +156,6 @@ mod tests {
     #[test]
     #[cfg(feature = "raw-crypto")]
     fn keeps_inner_message_type_as_plain_for_signed_messages() -> Result<(), Error> {
-        use k256::ecdsa::signature::Keypair;
-
         let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")

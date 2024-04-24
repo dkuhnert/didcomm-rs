@@ -1,6 +1,6 @@
 mod common;
 
-use common::*;
+use didcomm_rs::{Error, Message, Shape};
 use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]

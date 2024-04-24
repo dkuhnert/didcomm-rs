@@ -19,8 +19,6 @@ pub use jwe::*;
 pub use jws::*;
 pub use mediated::*;
 pub use message::*;
-#[cfg(feature = "raw-crypto")]
-pub use message_raw_crypto::*;
 pub use problem_report::*;
 
 /// trait that can be used to verify body, see example [here][crate]
