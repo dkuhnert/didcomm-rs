@@ -967,7 +967,7 @@ mod crypto_tests {
             bobs_public,
             ..
         } = get_keypair_set();
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let body = r#"{"foo":"bar"}"#;
         let message = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
@@ -999,7 +999,7 @@ mod crypto_tests {
             &jwe_string,
             Some(&bobs_private),
             Some(alice_public.to_vec()),
-            Some(&sign_keypair.public.to_bytes()),
+            Some(&sign_keypair.verifying_key().to_bytes()),
         );
 
         // Assert

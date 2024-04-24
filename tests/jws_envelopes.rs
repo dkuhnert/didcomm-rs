@@ -9,16 +9,17 @@ mod tests {
     use didcomm_rs::crypto::{SignatureAlgorithm, Signer};
     use didcomm_rs::{Error, Message};
 
+    use k256::ecdsa::signature::Keypair;
     use rand_core::OsRng;
     use serde_json::Value;
 
     #[test]
     fn can_create_flattened_jws_json() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
-            .kid(&hex::encode(sign_keypair.public.to_bytes()))
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()))
             .as_flat_jws(&SignatureAlgorithm::EdDsa)
             .sign(SignatureAlgorithm::EdDsa.signer(), &sign_keypair.to_bytes())?;
 
@@ -32,11 +33,11 @@ mod tests {
 
     #[test]
     fn can_create_general_jws_json() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
-            .kid(&hex::encode(sign_keypair.public.to_bytes()))
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()))
             .as_jws(&SignatureAlgorithm::EdDsa)
             .sign(SignatureAlgorithm::EdDsa.signer(), &sign_keypair.to_bytes())?;
 
@@ -50,23 +51,23 @@ mod tests {
 
     #[test]
     fn can_receive_flattened_jws_json() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
-            .kid(&hex::encode(sign_keypair.public.to_bytes()))
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()))
             .as_flat_jws(&SignatureAlgorithm::EdDsa)
             .sign(SignatureAlgorithm::EdDsa.signer(), &sign_keypair.to_bytes())?;
 
         // 'verify' style receive
-        let received = Message::verify(jws_string.as_bytes(), &sign_keypair.public.to_bytes());
+        let received = Message::verify(jws_string.as_bytes(), &sign_keypair.verifying_key().to_bytes());
         assert!(received.is_ok());
 
         // generic 'receive' style
         let received = Message::receive(
             &jws_string,
             Some(&[]),
-            Some(sign_keypair.public.as_bytes().to_vec()),
+            Some(sign_keypair.verifying_key().as_bytes().to_vec()),
             None,
         );
         assert!(received.is_ok());
@@ -76,23 +77,23 @@ mod tests {
 
     #[test]
     fn can_receive_general_jws_json() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
-            .kid(&hex::encode(sign_keypair.public.to_bytes()))
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()))
             .as_jws(&SignatureAlgorithm::EdDsa)
             .sign(SignatureAlgorithm::EdDsa.signer(), &sign_keypair.to_bytes())?;
 
         // 'verify' style receive
-        let received = Message::verify(jws_string.as_bytes(), &sign_keypair.public.to_bytes());
+        let received = Message::verify(jws_string.as_bytes(), &sign_keypair.verifying_key().to_bytes());
         assert!(received.is_ok());
 
         // generic 'receive' style
         let received = Message::receive(
             &jws_string,
             Some(&[]),
-            Some(sign_keypair.public.to_bytes().to_vec()),
+            Some(sign_keypair.verifying_key().to_bytes().to_vec()),
             None,
         );
         assert!(received.is_ok());

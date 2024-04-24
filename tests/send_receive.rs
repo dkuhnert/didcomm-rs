@@ -96,7 +96,7 @@ mod tests {
     #[cfg(not(feature = "resolve"))]
     fn send_receive_signed_json_test() {
         // Arrange + Act
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         // Message construction an JWS wrapping
         let message = Message::new() // creating message
             .from("did:xyz:ulapcuhsatnpuhza930hpu34n_") // setting from
@@ -114,7 +114,7 @@ mod tests {
         // Receiving JWS
         let received = Message::verify(
             &message.unwrap().as_bytes(),
-            &sign_keypair.public.to_bytes(),
+            &sign_keypair.verifying_key().to_bytes(),
         );
         // Assert
         assert!(&received.is_ok());
@@ -130,6 +130,8 @@ mod tests {
     fn send_receive_direct_signed_and_encrypted_xc20p_test() {
         // Arrange
         // keys
+
+        use k256::ecdsa::signature::Keypair;
         let KeyPairSet {
             alice_public: _,
             alice_private,
@@ -138,7 +140,7 @@ mod tests {
             mediators_public: carol_public,
             ..
         } = get_keypair_set();
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
 
         // Message construction
         let message = Message::new() // creating message
@@ -152,7 +154,7 @@ mod tests {
             .as_jwe(&CryptoAlgorithm::XC20P, Some(bobs_public.to_vec())) // set JOSE header for XC20P algorithm
             .add_header_field("my_custom_key".into(), "my_custom_value".into()) // custom header
             .add_header_field("another_key".into(), "another_value".into()) // another custom header
-            .kid(&hex::encode(sign_keypair.public.to_bytes())); // set kid header
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes())); // set kid header
 
         // Act
         // Send

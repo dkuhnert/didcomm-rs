@@ -41,7 +41,7 @@ mod tests {
     #[test]
     #[cfg(feature = "raw-crypto")]
     fn sets_message_type_correctly_for_signed_messages() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
@@ -71,17 +71,19 @@ mod tests {
     #[test]
     #[cfg(feature = "raw-crypto")]
     fn sets_message_type_correctly_for_signed_and_encrypted_messages() -> Result<(), Error> {
+        use k256::ecdsa::signature::Keypair;
+
         let KeyPairSet {
             alice_private,
             bobs_public,
             ..
         } = get_keypair_set();
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let message = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
             .as_jwe(&CryptoAlgorithm::XC20P, Some(bobs_public.to_vec()))
-            .kid(&hex::encode(sign_keypair.public.to_bytes()));
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()));
 
         let jwe_string = message.seal_signed(
             &alice_private,
@@ -156,12 +158,14 @@ mod tests {
     #[test]
     #[cfg(feature = "raw-crypto")]
     fn keeps_inner_message_type_as_plain_for_signed_messages() -> Result<(), Error> {
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        use k256::ecdsa::signature::Keypair;
+
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let jws_string = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
             .as_jws(&SignatureAlgorithm::EdDsa)
-            .kid(&hex::encode(sign_keypair.public.to_bytes()))
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()))
             .sign(SignatureAlgorithm::EdDsa.signer(), &sign_keypair.to_bytes())?;
 
         let jws_object: Value = serde_json::from_str(&jws_string)?;

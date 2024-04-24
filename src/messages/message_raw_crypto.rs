@@ -313,9 +313,9 @@ mod raw_tests {
     #[cfg(feature = "raw-crypto")]
     fn plugin_crypto_xChaCha20Paly1305_x25519_dalek_shared_secret() {
         // Arrange
-        let sender_sk = EphemeralSecret::new(rand_core::OsRng);
+        let sender_sk = EphemeralSecret::random_from_rng(rand_core::OsRng);
         let sender_pk = PublicKey::from(&sender_sk);
-        let recipient_sk = EphemeralSecret::new(rand_core::OsRng);
+        let recipient_sk = EphemeralSecret::random_from_rng(rand_core::OsRng);
         let recipient_pk = PublicKey::from(&recipient_sk);
         let sender_shared = sender_sk.diffie_hellman(&recipient_pk);
         let recipient_shared = recipient_sk.diffie_hellman(&sender_pk);

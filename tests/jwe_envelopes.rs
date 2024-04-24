@@ -7,6 +7,7 @@ mod tests {
         crypto::{CryptoAlgorithm, SignatureAlgorithm},
         Error, Message,
     };
+    use k256::ecdsa::signature::Keypair;
     use rand_core::OsRng;
     use serde_json::Value;
     use utilities::{get_keypair_set, KeyPairSet};
@@ -18,12 +19,12 @@ mod tests {
             bobs_public,
             ..
         } = get_keypair_set();
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let message = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
             .as_flat_jwe(&CryptoAlgorithm::XC20P, Some(bobs_public.to_vec()))
-            .kid(&hex::encode(sign_keypair.public.to_bytes()));
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()));
 
         let jwe_string = message.seal_signed(
             &alice_private,
@@ -59,14 +60,14 @@ mod tests {
             bobs_public,
             ..
         } = get_keypair_set();
-        let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+        let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
         let body = r#"{"foo":"bar"}"#;
         let message = Message::new()
             .from("did:key:z6MkiTBz1ymuepAQ4HEHYSF1H8quG5GLVVQR3djdX3mDooWp")
             .to(&["did:key:z6MkjchhfUsD6mmvni8mCdXHw216Xrm9bQe2mBH1P5RDjVJG"])
             .body(body)? // packing in some payload
             .as_flat_jwe(&CryptoAlgorithm::XC20P, Some(bobs_public.to_vec()))
-            .kid(&hex::encode(sign_keypair.public.to_bytes()));
+            .kid(&hex::encode(sign_keypair.verifying_key().to_bytes()));
 
         let jwe_string = message.seal_signed(
             &alice_private,

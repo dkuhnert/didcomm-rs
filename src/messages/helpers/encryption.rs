@@ -135,7 +135,7 @@ pub(crate) fn encrypt_cek(
     trace!("using algorithm {}", &alg);
 
     // zE (temporary secret)
-    let epk = StaticSecret::new(rand_core::OsRng);
+    let epk = StaticSecret::random_from_rng(rand_core::OsRng);
     let epk_public = PublicKey::from(&epk);
     let ze = generate_shared_for_recipient(epk.to_bytes(), dest, recipient_public_key.clone())?;
     trace!(

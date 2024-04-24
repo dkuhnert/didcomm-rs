@@ -140,7 +140,7 @@
 //! #         }
 //! #     ]
 //! # }"###;
-//! # let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+//! # let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
 //! // Message construction an JWS wrapping
 //! let message = Message::new() // creating message
 //!     .from("did:xyz:ulapcuhsatnpuhza930hpu34n_") // setting from
@@ -152,7 +152,7 @@
 //! //... transport is happening here ...
 //!
 //! // Receiving JWS
-//! let received = Message::verify(&message.as_bytes(), &sign_keypair.public.to_bytes());
+//! let received = Message::verify(&message.as_bytes(), &sign_keypair.verifying_key().to_bytes());
 //! ```
 //!
 //! ### 4. Prepare JWE message to be mediated -> mediate -> receive
@@ -269,7 +269,7 @@
 //!     bobs_public,
 //!     ..
 //! } = get_keypair_set();
-//! # let sign_keypair = ed25519_dalek::Keypair::generate(&mut OsRng);
+//! # let sign_keypair = ed25519_dalek::SigningKey::generate(&mut OsRng);
 //! // Message construction
 //! let message = Message::new() // creating message
 //!     .from("did:xyz:ulapcuhsatnpuhza930hpu34n_") // setting from

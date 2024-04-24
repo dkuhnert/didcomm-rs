@@ -1,4 +1,4 @@
-use std::convert::TryFrom;
+use std::convert::{TryFrom, TryInto};
 
 use super::*;
 
@@ -29,8 +29,10 @@ impl Signer for SignatureAlgorithm {
             // an &[u8] representing the scalar for the secret key, and a compressed Edwards-Y coordinate of a point on curve25519, both as bytes.
             SignatureAlgorithm::EdDsa => {
                 Box::new(|key: &[u8], message: &[u8]| -> Result<Vec<u8>, Error> {
-                    use ed25519_dalek::{Keypair, Signer};
-                    let key = Keypair::from_bytes(key)?;
+                    use ed25519_dalek::{Signer, SigningKey, SECRET_KEY_LENGTH};
+                    let key = SigningKey::from_bytes(
+                        key.try_into().map_err(|_| Error::InvalidKeySize(format!("ed25519 expects key size of {}", SECRET_KEY_LENGTH)))?
+                    );
                     let s = key.sign(message);
                     Ok(s.to_bytes().to_vec())
                 })
@@ -38,18 +40,21 @@ impl Signer for SignatureAlgorithm {
             SignatureAlgorithm::Es256 => {
                 Box::new(|key: &[u8], message: &[u8]| -> Result<Vec<u8>, Error> {
                     use p256::ecdsa::{signature::Signer, Signature, SigningKey};
-                    let sk = SigningKey::from_bytes(key)?;
+                    let sk = SigningKey::from_bytes(
+                        key.try_into().map_err(|_| Error::InvalidKeySize(format!("p256 invalid key size")))?
+                    )?;
                     let signature: Signature = sk.sign(message);
-                    Ok(signature.as_ref().to_vec())
+                    Ok(signature.to_bytes().to_vec())
                 })
             }
             SignatureAlgorithm::Es256k => {
                 Box::new(|key: &[u8], message: &[u8]| -> Result<Vec<u8>, Error> {
                     use k256::ecdsa::{signature::Signer, Signature, SigningKey};
-                    let sk =
-                        SigningKey::from_bytes(key).map_err(|e| Error::Generic(e.to_string()))?;
+                    let sk = SigningKey::from_bytes(
+                        key.try_into().map_err(|_| Error::InvalidKeySize(format!("k256 invalid key size")))?
+                    ).map_err(|e| Error::Generic(e.to_string()))?;
                     let signature: Signature = sk.sign(message);
-                    Ok(signature.as_ref().to_vec())
+                    Ok(signature.to_bytes().to_vec())
                 })
             }
         }
@@ -68,8 +73,10 @@ impl Signer for SignatureAlgorithm {
         match self {
             SignatureAlgorithm::EdDsa => Box::new(
                 |key: &[u8], message: &[u8], signature: &[u8]| -> Result<bool, Error> {
-                    use ed25519_dalek::{PublicKey, Signature, Verifier};
-                    let key = PublicKey::from_bytes(key)?;
+                    use ed25519_dalek::{VerifyingKey, Signature, Verifier, SECRET_KEY_LENGTH};
+                    let ed25519_key = key.try_into()
+                        .map_err(|_| Error::InvalidKeySize(format!("ed25519 expects key size of {}", SECRET_KEY_LENGTH)))?;
+                    let key = VerifyingKey::from_bytes(ed25519_key)?;
                     let s = Signature::try_from(signature)?;
                     Ok(key.verify(message, &s).is_ok())
                 },
@@ -118,7 +125,7 @@ fn es256k_test() {
     let signer = SignatureAlgorithm::Es256k.signer();
     let validator = SignatureAlgorithm::Es256k.validator();
     let sk: Vec<u8> = sk.to_bytes().to_vec();
-    let vk = vk.to_bytes().to_vec();
+    let vk = vk.to_sec1_bytes().to_vec();
     let signature = signer(&sk, m);
     let validation = validator(&vk, m, &signature.unwrap());
     // Assert
