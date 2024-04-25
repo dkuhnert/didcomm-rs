@@ -27,7 +27,7 @@ impl Cypher for CryptoAlgorithm {
                 |nonce: &[u8], key: &[u8], message: &[u8], aad: &[u8]| -> Result<Vec<u8>, Error> {
                     check_nonce(nonce, 24)?;
                     use chacha20poly1305::{
-                        aead::{Aead, NewAead, Payload},
+                        aead::{Aead, KeyInit, Payload},
                         XChaCha20Poly1305, XNonce,
                     };
                     let nonce = XNonce::from_slice(nonce);
@@ -40,7 +40,7 @@ impl Cypher for CryptoAlgorithm {
                 |nonce: &[u8], key: &[u8], message: &[u8], aad: &[u8]| -> Result<Vec<u8>, Error> {
                     check_nonce(nonce, 12)?;
                     use aes_gcm::{
-                        aead::{generic_array::GenericArray, Aead, NewAead, Payload},
+                        aead::{generic_array::GenericArray, Aead, KeyInit, Payload},
                         Aes256Gcm,
                     };
                     let nonce = GenericArray::from_slice(&nonce[..12]);
@@ -76,7 +76,7 @@ impl Cypher for CryptoAlgorithm {
                 |nonce: &[u8], key: &[u8], message: &[u8], aad: &[u8]| -> Result<Vec<u8>, Error> {
                     check_nonce(nonce, 24)?;
                     use chacha20poly1305::{
-                        aead::{Aead, NewAead, Payload},
+                        aead::{Aead, KeyInit, Payload},
                         XChaCha20Poly1305, XNonce,
                     };
                     let aead = XChaCha20Poly1305::new(key.into());
@@ -89,7 +89,7 @@ impl Cypher for CryptoAlgorithm {
                 |nonce: &[u8], key: &[u8], message: &[u8], aad: &[u8]| -> Result<Vec<u8>, Error> {
                     check_nonce(nonce, 12)?;
                     use aes_gcm::{
-                        aead::{generic_array::GenericArray, Aead, NewAead, Payload},
+                        aead::{generic_array::GenericArray, Aead, KeyInit, Payload},
                         Aes256Gcm,
                     };
                     let nonce = GenericArray::from_slice(&nonce[..12]);

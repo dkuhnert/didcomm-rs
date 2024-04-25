@@ -227,7 +227,7 @@ impl Message {
 #[cfg(test)]
 mod raw_tests {
     use chacha20poly1305::{
-        aead::{Aead, NewAead},
+        aead::{Aead, KeyInit},
         Key,
         XChaCha20Poly1305,
         XNonce,

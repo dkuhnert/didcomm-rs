@@ -3,7 +3,7 @@ use std::convert::{TryFrom, TryInto};
 use aes_gcm::{aead::generic_array::GenericArray, Aes256Gcm};
 use arrayref::array_ref;
 use chacha20poly1305::{
-    aead::{Aead, NewAead},
+    aead::{Aead, KeyInit},
     XChaCha20Poly1305, XNonce,
 };
 #[cfg(feature = "resolve")]
